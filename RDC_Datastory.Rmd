@@ -1,0 +1,311 @@
+---
+title: 'Data Story: What Impacts Household Wealth?'
+author: "Ryan Collins"
+date: "5/1/2020"
+output:
+  html_document:
+    df_print: paged
+  pdf_document:
+    latex_engine: xelatex
+mainfont: Arial
+fontsize: 11pt
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r packages, echo = T, include = F}
+library(tidyverse)
+library(readr)
+library(readxl)
+library(gridExtra)
+library(RcppRoll)
+library(tinytex)
+library(knitr)
+```
+
+```{r theme design, echo = T, include = F}
+my_theme <- theme_minimal() +
+  theme(
+    axis.text = element_text(size = 10),
+    axis.title.y = element_text(vjust = 3), 
+    axis.title.x = element_blank(),
+    axis.line.x = element_line(color = "gray70"), 
+    panel.grid.major.x = element_blank(), 
+    panel.grid.minor.x = element_blank(), 
+    panel.grid.minor.y = element_blank(), 
+    axis.ticks.x = element_line(),
+    panel.grid.major.y = element_line(color = "gray80",
+                                      linetype = "dotted"),
+    plot.margin = unit(c(1,1,1,1), "cm")
+  )
+```
+
+```{r datasets, echo = T, include = F}
+lifeexpect <- read_csv("data/SPDYNLE00INUSA (1).csv")
+perexpendituredurgood <- read_csv("data/Personalconsumptionexpenditure.csv")
+personalexpenditurechange <- read_csv("data/DPCERL1Q225SBEA.csv")
+consum_conf <- read_csv("data/CSCICP03USM665S.csv")
+hhsavings <- read_csv("data/Householdsavings.csv")
+savings_rt <- read_csv("data/PSAVERT.csv")
+changewealth <- read_csv("data/BOGZ1PC892090005Q.csv")
+debtpayperctdpi <- read_csv("data/TDSP.csv")
+totalcredittohh <- read_csv("data/QUSHAM770A.csv")
+Ownequityrealest <- read_csv("data/OEHRENWBSHNO.csv")
+investfundsequity <- read_csv("data/IEAAPIE.csv")
+homeequitypercent <- read_csv("data/homeequitypercent.csv")
+personalincome <- read_csv("data/personalincome.csv")
+```
+
+```{r merging data, echo = T, include = F}
+merged_data <- perexpendituredurgood %>%
+  left_join(consum_conf, by = "DATE")
+
+merged_data <- merged_data %>%
+  left_join(hhsavings, by = "DATE")
+
+merged_data <- merged_data %>%
+  left_join(changewealth, by = "DATE")
+
+merged_data <- merged_data %>%
+  left_join(debtpayperctdpi, by = "DATE")
+
+merged_data <- merged_data %>%
+  left_join(totalcredittohh, by = "DATE")
+
+merged_data <- merged_data %>%
+  left_join(Ownequityrealest, by = "DATE")
+
+merged_data <- merged_data %>%
+  left_join(investfundsequity, by = "DATE")
+
+merged_data <- merged_data %>%
+  left_join(homeequitypercent, by = "DATE")
+
+merged_data <- merged_data %>%
+  left_join(personalincome, by = "DATE")
+
+merged_data <- merged_data %>%
+  left_join(lifeexpect, by = "DATE")
+
+merged_data <- merged_data %>%
+  left_join(savings_rt, by = "DATE")
+
+merged_data <- merged_data %>%
+  left_join(personalexpenditurechange, by = "DATE")
+
+merged_data <- merged_data %>%
+  rename(personalexpend = PCEDG,
+         consum_conf = CSCICP03USM665S,
+         hhsavings = W398RC1A027NBEA,
+         changewealth = BOGZ1PC892090005Q,
+         debtpayperctdpi =  TDSP,
+         hhcredt = QUSHAM770A,
+         equityinrealest = OEHRENWBSHNO,
+         investfundinequity = IEAAPIE,
+         homeequitypercent = HOEREPHRE,
+         personalincome = MEPAINUSA672N,
+         lifeexpectancy = SPDYNLE00INUSA,
+         savings_rt = PSAVERT,
+         expenditure_change = DPCERL1Q225SBEA) %>%
+  mutate(changewealth = as.double(changewealth),
+         equityinrealest = as.double(equityinrealest),
+         homeequitypercent = as.double(homeequitypercent))
+
+merged_data <- filter(merged_data, DATE >= "1960-01-01")
+```
+
+One of the primary goals and intentions of public policy is to create the necessary environment for prosperity to enrich the lives of the public. Of course, there are many ways to do that and there is no specific consensus on what constitutes prosperity, provided one individual's image may differ from another's. While there may be some differences of opinion on what constitutes prosperity, everyone tends to would agree more of it would be preferable. To monetize prosperity is to form wealth. While definitionally, wealth suffers from the same conundrum of subjectivity, it's quantitative which makes it measurable.
+
+As the richest country in the world the United States is a model for how wealth functions. There are massive disparities in who has wealth, how it is created, and how it is stored (saved). As such, how does wealth work for the typical U.S. household? 
+
+Let's start with the most basic marker - time. It would make sense that as an individual's life expands there would be more opportunity to gain income and thus create wealth. In fact, this trend has been proven throughout the world - as countries gain wealth (increase in GDP), life expectancy rates also increase. The U.S. is no different.
+
+
+```{r plot 1 - life expectancy and personal income, warning = F, echo = T, include = F}
+#wrangling for plot 1:
+plot1 <- merged_data %>%
+  select(DATE, lifeexpectancy, personalincome)
+
+plot1 <- plot1 %>%
+  filter(!is.na(lifeexpectancy) & !is.na(personalincome))
+
+#plot1:
+ggplot(data = plot1, aes(x = lifeexpectancy, y = personalincome)) + 
+  geom_point(color = "#ffa41b", size = 2, alpha = 0.8) +
+  geom_line(color = "#005082", size = 1) + 
+    labs(title = "Life Expectancy and Personal Income",
+         subtitle = paste("Getting older means more income, or perhaps the other way around?"),
+         x = "Life Expectancy", 
+         y = "Personal Income",
+       caption = "Source: Federal Reserve") +
+  my_theme
+``` 
+
+```{r plot1, out.width = "85%", fig.align= "center", echo = F}
+include_graphics("/Users/benjikaminari/Desktop/Georgetown_MPP/Data_Viz/Rscripts/Datastory/Plots/Plot1_final.png")
+```
+
+Over the past half century, the U.S. has continued to increase life expectancy (until recently) and income has also increased - although it is difficult to know if income drives the correlation or if longer-life spans do. Nonetheless, the trend is clear and positive. This begs the next question, if we assume that longer-life times do indeed allow individuals the ability to earn for longer what do they do with those funds?
+
+On a basic balance sheet-level there are really only two options - save for later or spend it now. U.S. households are notorious for their low savings rate and high consumerism, yet the data paint a slightly different picture with year on year changes to the savings rate and personal expenditures seemingly oblivious to one another. While one would expect some level of interplay given the budget constraints U.S. household's experience that does not prove to be the case.
+
+```{r plot 2 - savings versus expenditure, warning = F, echo = T, include = F}
+#wrangling for plot2:
+plot2 <- merged_data %>%
+  select(DATE, savings_rt, expenditure_change)
+plot2 <- plot2 %>%
+  mutate(avg_rtqt = roll_mean(plot2$savings_rt,
+                              2, 
+                              by = 3,
+                              align = "center", fill = NA))
+
+plot2 <- plot2 %>%
+  filter(!is.na(avg_rtqt) & !is.na(expenditure_change))
+
+plot2 <- plot2 %>%
+  mutate(avg_rtqt5 = roll_mean(plot2$savings_rt,
+                              5,
+                              align = "center", fill = NA),
+         avg_expand = roll_mean(plot2$expenditure_change,
+                              5,
+                              align = "center", fill = NA))
+
+#plot 2:
+ggplot(data = plot2) + 
+  geom_line(mapping = aes(x = DATE, y = avg_rtqt5), color = "#bb3b0e", size = 1) +
+  geom_line(mapping = aes(x = DATE, y = avg_expand), color = "#708160", size = 1) +
+  geom_hline(yintercept = 0, color = "black", linetype = "dashed") +
+    scale_x_date(limits = as.Date(c("1954-01-01","2020-12-12")),
+                 date_labels = "%Y",
+                 date_breaks = "10 years",
+                 minor_breaks = NULL) +
+  labs(title = "Personal Consumption vs. Savings Rate 1960 - 2020",
+       subtitle = paste("Even with budget constraints, households don't make consumption",
+                        "decisions based on savings nor the other way around."),
+       x = "Year", 
+       y = "Perecent",
+       caption = "Source: Federal Reserve") +
+  my_theme + 
+  theme(panel.grid.major.x = element_line(color = "gray80",
+                                      linetype = "dotted"))
+```
+
+```{r plot2, out.width = "85%", fig.align= "center", echo = F}
+include_graphics("/Users/benjikaminari/Desktop/Georgetown_MPP/Data_Viz/Rscripts/Datastory/Plots/Plot2_final.png")
+```
+
+On a changing year-by-year basis, its clear personal household expenditures experience a lot of volatility. Why consumption does this and does not move with savings remains less clear when looking at the past 60 years. Interestingly, the same goes for the savings rate. While it experiences year to year fluctuations, starting in the late 1970s there is a clear decline. Some of this could be due to the introduction of other forms of financial accounts - credit cards for example - or national and global economic shocks or perhaps changes in policy at the Federal Reserve. One thing is clear though that a household’s consumption and savings appear to be almost independent of one another, except for one point - the 2008 financial crisis. Perhaps then, it is beneficial to look at the change in U.S. household net worth over the same period and to see if there were similar effects on wealth.
+
+```{r plot 3 - debt and change in wealth, warning = F, echo = T, include = F}
+#wrangling for plot3: 
+plot3 <- merged_data %>%
+  select(DATE, changewealth)
+
+plot3 <- plot3 %>%
+  mutate(date = as.character(DATE)) %>%
+    filter(!is.na(changewealth))
+
+plot3 <- plot3 %>%
+  mutate(avgwealthchange = roll_mean(plot3$changewealth,
+                              5,
+                              align = "center", fill = NA))
+
+sub <- c("1974-04-01", "1990-04-01", "2002-01-01", "2008-07-01")
+plot3sub <- filter(plot3, date %in% sub)
+plot3sub <- plot3sub %>%
+  mutate(date = as.Date(date))
+
+#plot 3:
+ggplot() + 
+  geom_point(data = plot3, mapping = aes(x = DATE, y = changewealth),
+             color = "#ececec") +
+  geom_line(data = plot3, mapping = aes(x = DATE, y = avgwealthchange), 
+            color = "#c1a57b") +
+  geom_point(data = plot3sub, mapping = aes(x = date, y = avgwealthchange), 
+             color = "#30475e", size = 2) +
+  geom_text(data = plot3sub, mapping = aes(x = date, y = avgwealthchange, label = DATE), 
+            size = 2.5, vjust = 1.75) +
+  geom_hline(yintercept = 0, color = "black", linetype = "dashed") +
+  scale_x_date(limits = as.Date(c("1954-01-01","2020-12-12")),
+               date_labels = "%Y",
+               date_breaks = "10 years",
+               minor_breaks = NULL) +
+  labs(title = "Change in Household Wealth from Year to Year",
+       subtitle = paste("Household wealth is surprisingly consistent through most downturns",
+                        "yet the 2008 financial crisis was different"),
+       x = "Year", 
+       y = "Perecent",
+       caption = "Source: Federal Reserve") +
+  my_theme + 
+  theme(panel.grid.major.x = element_line(color = "gray80",
+                                            linetype = "dotted"))
+```
+
+```{r plot3, out.width = "85%", fig.align= "center", echo = F}
+include_graphics("/Users/benjikaminari/Desktop/Georgetown_MPP/Data_Viz/Rscripts/Datastory/Plots/Plot3_final.png")
+```
+
+Not surprisingly, there is an unmistakable drop in wealth during the financial crisis. Interestingly, earlier crisis such as the oil crisis of the late 70s, or the savings and loan crisis of the 80s and 90s does not seem to the same impact on a household’s wealth. Only the 2001 dot.com bubble pushes the year-to-year trend line negative. What made 2008 so different from earlier crisis? 
+
+One word: housing. 
+
+```{r plot 4 - housing equity, warning = F, echo = T, include = F}
+#wrangling for plot4:
+plot4 <- read_excel("~/Desktop/Georgetown_MPP/Data_Viz/Data/wealth_tables_cy2015.xlsx")
+plot4 <- filter(plot4, Category == "Annual Household Income")
+plot4 <- select(plot4, c(Characteristic, 
+                         Retirement_accounts_Total, 
+                         Equity_in_Own_Home, 
+                         Assets_at_Fincial_Institutions_Total))
+plot4 <- pivot_longer(plot4, 
+                         names_to = "Family wealth",
+                         values_to = "dollars",
+                         2:4)
+plot4 <- plot4 %>%
+  rename(annual_income = Characteristic)
+         
+income_levels <- c("Highest quintile",
+                   "Fourth quintile",
+                   "Third quintile",
+                   "Second quintile",
+                   "Lowest quintile")
+
+plot4$annual_income <- factor(plot4$annual_income, 
+                           income_levels)
+
+plot4 <- plot4 %>%
+  mutate(area.color = c("blue", "red", "blue", 
+                        "blue", "red", "blue", 
+                        "blue", "red", "blue", 
+                        "blue", "red", "blue", 
+                        "blue", "red", "blue"))
+
+#plot4:
+ggplot(data = plot4, mapping = aes(x = `Family wealth`, y = dollars, fill = area.color)) + 
+geom_bar(stat = "identity", alpha = 0.8) +
+  geom_text(mapping = aes(label = dollars), 
+            size = 2.5) +
+  scale_fill_manual(values = c("#eae7d9",
+                               "#937d14",
+                               "#eae7d9")) +
+  coord_flip() +
+  facet_wrap(~annual_income) +
+    labs(title = "Largest Household Assets by Income Quintile",
+       subtitle = paste("Equity in homes is by far the largest asset for households across",
+                        "the income spectrum"),
+       caption = "Source: Federal Reserve") +
+  my_theme +
+  theme(legend.position = "none")
+```
+
+```{r plot4, out.width = "85%", fig.align= "center", echo = F}
+include_graphics("/Users/benjikaminari/Desktop/Georgetown_MPP/Data_Viz/Rscripts/Datastory/Plots/Plot4_final.png")
+```
+
+One aspect becomes abundantly clear is that the 2008 financial crisis largely targeted the single largest asset in U.S. household balance sheets - particularly when looking across the average income quintiles. This is particularly evident for those whose incomes are in the bottom two-fifths of income where there is an average of $76,000 in house equity. That’s notable when the median family income is only $62,000/year. 
+
+It's clear that assets like housing have significant more influence on a household's wealth than the spending and savings habits of those same households. Policy makers should understand that and tailor their prescriptions accordingly 
