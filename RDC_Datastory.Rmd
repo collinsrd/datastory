@@ -118,9 +118,9 @@ merged_data <- merged_data %>%
 merged_data <- filter(merged_data, DATE >= "1960-01-01")
 ```
 
-One of the primary goals and intentions of public policy is to create the necessary environment for prosperity to enrich the lives of the public. Of course, there are many ways to do that and there is no specific consensus on what constitutes prosperity, provided one individual's image may differ from another's. While there may be some differences of opinion on what constitutes prosperity, everyone tends to would agree more of it would be preferable. To monetize prosperity is to form wealth. While definitionally, wealth suffers from the same conundrum of subjectivity, it's quantitative which makes it measurable.
+One of the primary goals and intentions of public policy is to create the necessary environment for prosperity to enrich the lives of the public. Of course, there are many ways to do that and there is no specific consensus on what constitutes prosperity, provided one individual's image may differ from another's. While there may be some differences of opinion on what constitutes prosperity, everyone tends to agree more of it would be preferable. To monetize prosperity is to form wealth. While definitionally, wealth suffers from the same conundrum of subjectivity, it's quantitative which makes it measurable.
 
-As the richest country in the world the United States is a model for how wealth functions. There are massive disparities in who has wealth, how it is created, and how it is stored (saved). As such, how does wealth work for the typical U.S. household? 
+As the richest country in the world, the United States is a model for how wealth functions. There are massive disparities in who has it, how it is created, and how it is stored (saved). As such, how does wealth work for the typical U.S. household? 
 
 Let's start with the most basic marker - time. It would make sense that as an individual's life expands there would be more opportunity to gain income and thus create wealth. In fact, this trend has been proven throughout the world - as countries gain wealth (increase in GDP), life expectancy rates also increase. The U.S. is no different.
 
@@ -151,7 +151,7 @@ include_graphics("/Users/benjikaminari/Desktop/Georgetown_MPP/Data_Viz/Rscripts/
 
 Over the past half century, the U.S. has continued to increase life expectancy (until recently) and income has also increased - although it is difficult to know if income drives the correlation or if longer-life spans do. Nonetheless, the trend is clear and positive. This begs the next question, if we assume that longer-life times do indeed allow individuals the ability to earn for longer what do they do with those funds?
 
-On a basic balance sheet-level there are really only two options - save for later or spend it now. U.S. households are notorious for their low savings rate and high consumerism, yet the data paint a slightly different picture with year on year changes to the savings rate and personal expenditures seemingly oblivious to one another. While one would expect some level of interplay given the budget constraints U.S. household's experience that does not prove to be the case.
+On a basic balance sheet-level there are really only two options - save for later or spend it now. Anecodotally, which research supports, U.S. households are notorious for their low savings rate and high consumerism, yet the data paint a slightly different picture.
 
 ```{r plot 2 - savings versus expenditure, warning = F, echo = T, include = F}
 #wrangling for plot2:
@@ -198,7 +198,9 @@ ggplot(data = plot2) +
 include_graphics("/Users/benjikaminari/Desktop/Georgetown_MPP/Data_Viz/Rscripts/Datastory/Plots/Plot2_final.png")
 ```
 
-On a changing year-by-year basis, its clear personal household expenditures experience a lot of volatility. Why consumption does this and does not move with savings remains less clear when looking at the past 60 years. Interestingly, the same goes for the savings rate. While it experiences year to year fluctuations, starting in the late 1970s there is a clear decline. Some of this could be due to the introduction of other forms of financial accounts - credit cards for example - or national and global economic shocks or perhaps changes in policy at the Federal Reserve. One thing is clear though that a household’s consumption and savings appear to be almost independent of one another, except for one point - the 2008 financial crisis. Perhaps then, it is beneficial to look at the change in U.S. household net worth over the same period and to see if there were similar effects on wealth.
+Looking at the year over year change to the savings rate and personal expenditure percentages, there seems to be some level of coordination. While one would expect some level of interplay given the budget constraints U.S. household's experience, the relationship one would expect would be negatively correlated. If there is only so many dollars to go around, they can either go to consumption or saving.
+
+It is clear personal household expenditures experience a level of volatility over each preceeding decade, although stays constantly positive for most of the last century. That underbellies the idea that Americans are, in large part consuming more, although on a more infrequent basis. Interestingly, as consumption rises and falls so does the savings rate. While it experiences year to year fluctuations less volitle than expenditures, starting in the late 1970s there is a clear decline - again showing that on average Americans save less and less. Some of this could be due to the introduction of other forms of financial accounts - credit cards for example - or national and global economic shocks or perhaps changes in policy at the Federal Reserve. One thing is clear though that a household’s consumption and savings appear to be somewhat connected but not in the way one would expect. There is one point of importance - the 2008 financial crisis. The Great Recession was devestating in many ways but it presents a clear inflection point for both savings and consumption. How does it impact wealth overall?
 
 ```{r plot 3 - debt and change in wealth, warning = F, echo = T, include = F}
 #wrangling for plot3: 
@@ -249,9 +251,9 @@ ggplot() +
 include_graphics("/Users/benjikaminari/Desktop/Georgetown_MPP/Data_Viz/Rscripts/Datastory/Plots/Plot3_final.png")
 ```
 
-Not surprisingly, there is an unmistakable drop in wealth during the financial crisis. Interestingly, earlier crisis such as the oil crisis of the late 70s, or the savings and loan crisis of the 80s and 90s does not seem to the same impact on a household’s wealth. Only the 2001 dot.com bubble pushes the year-to-year trend line negative. What made 2008 so different from earlier crisis? 
+Not surprisingly, there is the unmistakable drop in wealth during the financial crisis as seen in the earlier graph on savings and consumption. Interestingly though, earlier crisis such as the oil crisis of the late 70s, or the savings and loan crisis of the 80s and 90s do not seem to have the same impact on a household’s wealth. Only the 2001 dot.com bubble pushes the year-to-year trend line negative. What made 2008 so different from earlier crisis? 
 
-One word: housing. 
+It would appear one thing - housing. 
 
 ```{r plot 4 - housing equity, warning = F, echo = T, include = F}
 #wrangling for plot4:
@@ -306,6 +308,5 @@ geom_bar(stat = "identity", alpha = 0.8) +
 include_graphics("/Users/benjikaminari/Desktop/Georgetown_MPP/Data_Viz/Rscripts/Datastory/Plots/Plot4_final.png")
 ```
 
-One aspect becomes abundantly clear is that the 2008 financial crisis largely targeted the single largest asset in U.S. household balance sheets - particularly when looking across the average income quintiles. This is particularly evident for those whose incomes are in the bottom two-fifths of income where there is an average of $76,000 in house equity. That’s notable when the median family income is only $62,000/year. 
+One aspect becomes abundantly clear: the 2008 financial crisis largely targeted the asset with the most outsized includence on U.S. household balance sheets - especially when looking across the average income quintiles. This is particularly evident for those whose incomes are in the bottom two-fifths of income where there is an average of $76,000 in house equity. That’s notable when the median family income is only $62,000/year. It appears that households wealth, consumption and savings patterns are dictated by more than just income. Moreover, that underlying asset (and debt) classes can have a meaningful impact on the typical families' yearly finanical patterns. 
 
-It's clear that assets like housing have significant more influence on a household's wealth than the spending and savings habits of those same households. Policy makers should understand that and tailor their prescriptions accordingly 
